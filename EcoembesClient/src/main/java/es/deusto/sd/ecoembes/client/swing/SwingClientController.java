@@ -47,7 +47,7 @@ public class SwingClientController {
         return serviceProxy.getContenedoresPorZona(cp, fecha);
     }
 
-    public List<NivelLlenado> getHistorial(Long id, String fechaInicio, String fechaFin) {
+    public List<NivelLlenadoDTO> getHistorial(Long id, String fechaInicio, String fechaFin) {
         return serviceProxy.getHistorial(id, fechaInicio, fechaFin);
     }
     

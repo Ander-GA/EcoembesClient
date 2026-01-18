@@ -1,4 +1,4 @@
-package es.deusto.sd.eoembes.client.proxies;
+package es.deusto.sd.ecoembes.client.proxies;
 
 import java.util.List;
 import es.deusto.sd.ecoembes.client.dto.*;
