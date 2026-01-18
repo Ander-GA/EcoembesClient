@@ -1,0 +1,60 @@
+package es.deusto.sd.ecoembes.client.swing;
+
+import java.util.List;
+
+
+import es.deusto.sd.ecoembes.client.dto.*;
+import es.deusto.sd.ecoembes.client.proxies.IEcoembesServiceProxy;
+
+public class SwingClientController {
+
+    private IEcoembesServiceProxy serviceProxy;
+    private String token; // Guardamos el token de sesión aquí
+
+    // Recibimos el proxy en el constructor (Inyección de dependencias manual)
+    public SwingClientController(IEcoembesServiceProxy serviceProxy) {
+        this.serviceProxy = serviceProxy;
+    }
+
+    public boolean login(String email, String password) {
+        try {
+            this.token = serviceProxy.login(new CredentialsDTO(email, password));
+            return true; // Login OK
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false; // Login fallido
+        }
+    }
+
+    public void logout() {
+        if (token != null) {
+            serviceProxy.logout(token);
+            token = null;
+        }
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    // --- Métodos que usarán las ventanas ---
+
+    public void crearContenedor(ContainerDTO container) {
+        serviceProxy.createContainer(container, token);
+    }
+
+    public List<EstadoContenedorDTO> getContenedoresPorZona(int cp, String fecha) {
+        return serviceProxy.getContenedoresPorZona(cp, fecha);
+    }
+
+    public List<NivelLlenado> getHistorial(Long id, String fechaInicio, String fechaFin) {
+        return serviceProxy.getHistorial(id, fechaInicio, fechaFin);
+    }
+    
+    public void asignarMasivamente(Long plantaId, List<Long> contenedores) {
+        AsignacionMasivaDTO dto = new AsignacionMasivaDTO();
+        dto.setToken(token);
+        dto.setContainerIds(contenedores);
+        serviceProxy.asignarContenedores(plantaId, dto);
+    }
+}
