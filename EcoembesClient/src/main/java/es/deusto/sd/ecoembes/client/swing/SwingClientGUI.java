@@ -23,7 +23,7 @@ public class SwingClientGUI extends JFrame {
 
     private void initUI() {
         setTitle("Ecoembes Client - Prototipo 3 (Final)");
-        setSize(950, 700);
+        setSize(950, 750); // Un poco más alto para que quepa todo bien
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -38,10 +38,10 @@ public class SwingClientGUI extends JFrame {
         // 3. Historial (Versión Porcentajes)
         tabs.addTab("3. Historial Llenado", createPanelHistorial());
 
-        // 4. Asignación Masiva
+        // 4. Asignación Masiva (¡CON EL BOTÓN RECUPERADO!)
         tabs.addTab("4. Asignar a Planta", createPanelAsignacion());
         
-        // 5. Capacidad Planta (Nuevo)
+        // 5. Capacidad Planta (Pestaña dedicada)
         tabs.addTab("5. Consultar Capacidad", createPanelCapacidad());
         
         // Botón Logout
@@ -112,7 +112,7 @@ public class SwingClientGUI extends JFrame {
                 for (EstadoContenedorDTO dto : lista) {
                     sb.append("ID: ").append(dto.getId())
                       .append(" | Dir: ").append(dto.getDireccion())
-                      .append(" | Nivel: ").append(String.format("%.2f", dto.getNivelEnFecha())).append(" L") // Aquí sigue siendo litros absolutos si no lo cambiaste en ese endpoint
+                      .append(" | Nivel: ").append(String.format("%.2f", dto.getNivelEnFecha())).append(" L") 
                       .append("\n------------------\n");
                 }
                 areaResultados.setText(sb.toString());
@@ -145,7 +145,7 @@ public class SwingClientGUI extends JFrame {
         btnHistorial.addActionListener(e -> {
             try {
                 Long id = Long.parseLong(txtId.getText());
-                // El servidor ahora devuelve DTOs con el PORCENTAJE calculado
+                // El servidor devuelve DTOs con el PORCENTAJE calculado
                 List<NivelLlenadoDTO> historial = controller.getHistorial(id, txtFInicio.getText(), txtFFin.getText());
                 
                 StringBuilder sb = new StringBuilder();
@@ -170,11 +170,17 @@ public class SwingClientGUI extends JFrame {
 
     private JPanel createPanelAsignacion() {
         JPanel panel = new JPanel(new BorderLayout());
-        JPanel form = new JPanel(new GridLayout(4, 1));
+        
+        // Aumentamos el grid para que quepa el botón extra
+        JPanel form = new JPanel(new GridLayout(6, 1)); 
         
         JPanel p1 = new JPanel();
         JTextField txtPlantaId = new JTextField(5);
+        // --- BOTÓN RECUPERADO ---
+        JButton btnCheckCapacidad = new JButton("🔍 Ver Capacidad");
+        
         p1.add(new JLabel("ID Planta Destino:")); p1.add(txtPlantaId);
+        p1.add(btnCheckCapacidad); // Lo añadimos al panel 1
         
         JPanel p2 = new JPanel();
         JTextField txtContenedores = new JTextField(20);
@@ -183,6 +189,7 @@ public class SwingClientGUI extends JFrame {
         JButton btnAsignar = new JButton("EJECUTAR ASIGNACIÓN");
         
         form.add(p1);
+        form.add(new JLabel("   (Pulsa la lupa para comprobar antes de asignar)"));
         form.add(p2);
         form.add(new JLabel("Se enviará notificación automática al finalizar."));
         form.add(btnAsignar);
@@ -190,6 +197,19 @@ public class SwingClientGUI extends JFrame {
         JTextArea areaLog = new JTextArea();
         areaLog.setEditable(false);
 
+        // LÓGICA DEL BOTÓN LUPA (RECUPERADA)
+        btnCheckCapacidad.addActionListener(e -> {
+            try {
+                Long plantaId = Long.parseLong(txtPlantaId.getText());
+                // Usamos una fecha fija o la de hoy para verificar rápido
+                double capacidad = controller.getCapacidadPlanta(plantaId, "2026-01-20");
+                areaLog.append("ℹ️ Capacidad en Planta " + plantaId + ": " + String.format("%.2f", capacidad) + " litros.\n");
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error verificando: " + ex.getMessage());
+            }
+        });
+
+        // LÓGICA DE ASIGNACIÓN
         btnAsignar.addActionListener(e -> {
             try {
                 Long plantaId = Long.parseLong(txtPlantaId.getText());
@@ -207,6 +227,7 @@ public class SwingClientGUI extends JFrame {
                 areaLog.append("❌ Error: " + ex.getMessage() + "\n");
             }
         });
+        
         panel.add(form, BorderLayout.NORTH);
         panel.add(new JScrollPane(areaLog), BorderLayout.CENTER);
         return panel;
