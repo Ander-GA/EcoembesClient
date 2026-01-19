@@ -15,4 +15,5 @@ public interface IEcoembesServiceProxy {
 
     // Plantas
     void asignarContenedores(Long plantaId, AsignacionMasivaDTO asignacion);
+    double getCapacidadPlanta(Long plantaId, String fecha);
 }

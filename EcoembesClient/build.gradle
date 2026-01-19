@@ -42,5 +42,5 @@ task runSwingClient(type: JavaExec) {
 
 // Spring Boot configuration, defaults to running the web client
 bootRun {
-    mainClass.set("es.deusto.sd.ecoembes.client.web.WebClientApplication")
+    //mainClass.set("es.deusto.sd.ecoembes.client.web.WebClientApplication")
 }

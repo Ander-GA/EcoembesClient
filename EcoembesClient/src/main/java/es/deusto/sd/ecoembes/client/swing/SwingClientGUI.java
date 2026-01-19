@@ -41,6 +41,8 @@ public class SwingClientGUI extends JFrame {
         // Pestaña 4: Asignación Masiva (¡NUEVA!)
         tabs.addTab("4. Asignar a Planta", createPanelAsignacion());
         
+        tabs.addTab("5. Consultar Capacidad", createPanelCapacidad());
+        
         // Botón de Logout abajo
         JButton btnLogout = new JButton("Cerrar Sesión");
         btnLogout.addActionListener(e -> {
@@ -125,7 +127,6 @@ public class SwingClientGUI extends JFrame {
         return panel;
     }
 
-    // --- PANELES NUEVOS ---
 
     private JPanel createPanelHistorial() {
         JPanel panel = new JPanel(new BorderLayout());
@@ -169,57 +170,122 @@ public class SwingClientGUI extends JFrame {
         return panel;
     }
 
-    private JPanel createPanelAsignacion() {
-        JPanel panel = new JPanel(new BorderLayout());
-        
-        // Formulario superior
-        JPanel form = new JPanel(new GridLayout(4, 1));
-        
-        JPanel p1 = new JPanel();
-        JTextField txtPlantaId = new JTextField(5);
-        p1.add(new JLabel("ID Planta Reciclaje:")); p1.add(txtPlantaId);
-        
-        JPanel p2 = new JPanel();
-        JTextField txtContenedores = new JTextField(20);
-        p2.add(new JLabel("IDs Contenedores (separados por coma):")); p2.add(txtContenedores);
-        // Ejemplo visual: "1, 2, 5"
-        
-        JButton btnAsignar = new JButton("Realizar Asignación Masiva");
-        
-        form.add(p1);
-        form.add(p2);
-        form.add(new JLabel("Ejemplo IDs: 1, 2, 5"));
-        form.add(btnAsignar);
+ private JPanel createPanelAsignacion() {
+    JPanel panel = new JPanel(new BorderLayout());
+    
+    // Formulario superior
+    JPanel form = new JPanel(new GridLayout(6, 1, 5, 5));
+    
+    JPanel p1 = new JPanel();
+    JTextField txtPlantaId = new JTextField(5);
+    JButton btnVerCapacidad = new JButton("🔍 Ver Capacidad");
+    p1.add(new JLabel("ID Planta:")); 
+    p1.add(txtPlantaId);
+    p1.add(btnVerCapacidad);
+    
+    JPanel p2 = new JPanel();
+    JTextField txtContenedores = new JTextField(20);
+    p2.add(new JLabel("IDs Contenedores (ej: 1, 2):")); p2.add(txtContenedores);
+    
+    JButton btnAsignar = new JButton("Realizar Asignación Masiva");
+    
+    form.add(p1);
+    form.add(new JLabel("   (Pulsa la lupa para ver si la planta tiene hueco)"));
+    form.add(p2);
+    form.add(new JLabel(""));
+    form.add(btnAsignar);
 
-        JTextArea areaLog = new JTextArea();
-        areaLog.setEditable(false);
+    JTextArea areaLog = new JTextArea();
+    areaLog.setEditable(false);
 
-        btnAsignar.addActionListener(e -> {
-            try {
-                Long plantaId = Long.parseLong(txtPlantaId.getText());
-                String[] idsString = txtContenedores.getText().split(",");
-                List<Long> listaIds = new ArrayList<>();
-                
-                for(String s : idsString) {
-                    listaIds.add(Long.parseLong(s.trim()));
-                }
+    // ACCIÓN 1: Ver Capacidad (Cumple el requisito que faltaba)
+    btnVerCapacidad.addActionListener(e -> {
+        try {
+            Long plantaId = Long.parseLong(txtPlantaId.getText());
+            // Usamos fecha de hoy por defecto
+            double capacidad = controller.getCapacidadPlanta(plantaId, "2026-01-20");
+            
+            areaLog.append("ℹ️ Capacidad en Planta " + plantaId + ": " + capacidad + " litros.\n");
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+        }
+    });
 
-                controller.asignarMasivamente(plantaId, listaIds);
-                areaLog.append("✅ Asignación enviada correctamente a Planta " + plantaId + "\n");
-                areaLog.append("Contenedores procesados: " + listaIds + "\n");
-                
-            } catch (NumberFormatException nfe) {
-                JOptionPane.showMessageDialog(this, "Error: Revisa que los IDs sean números.");
-            } catch (Exception ex) {
-                areaLog.append("❌ Error en asignación: " + ex.getMessage() + "\n");
+    // ACCIÓN 2: Asignar (Ya lo tenías, esta es la "Notificación")
+    btnAsignar.addActionListener(e -> {
+        try {
+            Long plantaId = Long.parseLong(txtPlantaId.getText());
+            String[] idsString = txtContenedores.getText().split(",");
+            List<Long> listaIds = new ArrayList<>();
+            
+            for(String s : idsString) {
+                listaIds.add(Long.parseLong(s.trim()));
             }
-        });
 
-        panel.add(form, BorderLayout.NORTH);
-        panel.add(new JScrollPane(areaLog), BorderLayout.CENTER);
-        return panel;
-    }
+            controller.asignarMasivamente(plantaId, listaIds);
+            
+            // ESTO ES LA NOTIFICACIÓN (Visual en cliente)
+            areaLog.append("✅ ASIGNACIÓN COMPLETADA.\n");
+            areaLog.append("   -> Enviados a Planta " + plantaId + "\n");
+            areaLog.append("   -> Contenedores: " + listaIds + "\n");
+            areaLog.append("--------------------------------------------------\n");
+            
+        } catch (Exception ex) {
+            areaLog.append("❌ Error en asignación: " + ex.getMessage() + "\n");
+        }
+    });
 
+    panel.add(form, BorderLayout.NORTH);
+    panel.add(new JScrollPane(areaLog), BorderLayout.CENTER);
+    return panel;
+}
+ private JPanel createPanelCapacidad() {
+     JPanel panel = new JPanel(new BorderLayout());
+     
+     JPanel top = new JPanel();
+     JTextField txtId = new JTextField(5);
+     JTextField txtFecha = new JTextField("2026-01-20", 10);
+     JButton btnConsultar = new JButton("Consultar Disponibilidad");
+     
+     top.add(new JLabel("ID Planta:")); top.add(txtId);
+     top.add(new JLabel("Fecha:")); top.add(txtFecha);
+     top.add(btnConsultar);
+
+     JTextArea areaInfo = new JTextArea();
+     areaInfo.setEditable(false);
+     areaInfo.setFont(new java.awt.Font("Monospaced", java.awt.Font.BOLD, 14));
+
+     btnConsultar.addActionListener(e -> {
+         try {
+             Long id = Long.parseLong(txtId.getText());
+             double capacidad = controller.getCapacidadPlanta(id, txtFecha.getText());
+             
+             areaInfo.setText(""); // Limpiar
+             if (capacidad >= 0) {
+                 areaInfo.append("\n  🏭 PLANTA " + id + "\n");
+                 areaInfo.append("  --------------------------\n");
+                 areaInfo.append("  📅 Fecha: " + txtFecha.getText() + "\n");
+                 areaInfo.append("  📦 Capacidad Disponible: " + String.format("%.2f", capacidad) + " litros\n");
+                 
+                 if(capacidad < 1000) {
+                     areaInfo.append("\n  ⚠️ ¡ATENCIÓN! Queda poco espacio.\n");
+                 } else {
+                     areaInfo.append("\n  ✅ La planta tiene espacio suficiente.\n");
+                 }
+             } else {
+                 areaInfo.append("❌ Error: No se pudo obtener la capacidad.\n(Revisa que el ID exista y el servidor esté activo)");
+             }
+         } catch (NumberFormatException nfe) {
+             JOptionPane.showMessageDialog(this, "El ID debe ser un número.");
+         } catch (Exception ex) {
+             areaInfo.setText("Error: " + ex.getMessage());
+         }
+     });
+
+     panel.add(top, BorderLayout.NORTH);
+     panel.add(new JScrollPane(areaInfo), BorderLayout.CENTER);
+     return panel;
+ }
 
     // --- MAIN ---
     public static void main(String[] args) {

@@ -2,16 +2,14 @@ package es.deusto.sd.ecoembes.client.swing;
 
 import java.util.List;
 
-
 import es.deusto.sd.ecoembes.client.dto.*;
 import es.deusto.sd.ecoembes.client.proxies.IEcoembesServiceProxy;
 
 public class SwingClientController {
 
     private IEcoembesServiceProxy serviceProxy;
-    private String token; // Guardamos el token de sesión aquí
+    private String token; 
 
-    // Recibimos el proxy en el constructor (Inyección de dependencias manual)
     public SwingClientController(IEcoembesServiceProxy serviceProxy) {
         this.serviceProxy = serviceProxy;
     }
@@ -19,10 +17,10 @@ public class SwingClientController {
     public boolean login(String email, String password) {
         try {
             this.token = serviceProxy.login(new CredentialsDTO(email, password));
-            return true; // Login OK
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
-            return false; // Login fallido
+            return false;
         }
     }
 
@@ -37,7 +35,7 @@ public class SwingClientController {
         return token;
     }
 
-    // --- Métodos que usarán las ventanas ---
+    // --- MÉTODOS DE NEGOCIO ---
 
     public void crearContenedor(ContainerDTO container) {
         serviceProxy.createContainer(container, token);
@@ -56,5 +54,8 @@ public class SwingClientController {
         dto.setToken(token);
         dto.setContainerIds(contenedores);
         serviceProxy.asignarContenedores(plantaId, dto);
+    }
+    public double getCapacidadPlanta(Long plantaId, String fecha) {
+        return serviceProxy.getCapacidadPlanta(plantaId, fecha);
     }
 }

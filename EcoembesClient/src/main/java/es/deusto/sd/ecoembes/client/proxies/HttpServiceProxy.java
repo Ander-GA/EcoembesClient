@@ -2,6 +2,7 @@ package es.deusto.sd.ecoembes.client.proxies;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -75,5 +76,20 @@ public class HttpServiceProxy implements IEcoembesServiceProxy {
     public void asignarContenedores(Long plantaId, AsignacionMasivaDTO asignacion) {
         String url = SERVER_URL + "/plantas/" + plantaId + "/asignar";
         restTemplate.postForObject(url, asignacion, Void.class);
+    }
+    @Override
+    public double getCapacidadPlanta(Long plantaId, String fecha) {
+        // GET /plantas/{id}/capacidad?fecha=YYYY-MM-DD
+        String url = SERVER_URL + "/plantas/" + plantaId + "/capacidad?fecha=" + fecha;
+        
+        // Recibimos un Map<String, Object> del servidor
+        @SuppressWarnings("unchecked")
+        Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+        
+        if (response != null && response.containsKey("capacidadDisponible")) {
+            // Convertimos el objeto a double con cuidado
+            return Double.parseDouble(response.get("capacidadDisponible").toString());
+        }
+        return -1.0; // Código de error si falla
     }
 }
