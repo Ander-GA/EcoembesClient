@@ -1,16 +1,17 @@
 package es.deusto.sd.ecoembes.client.dto;
 
+import java.time.LocalDate;
 
 public class NivelLlenadoDTO {
 
     private Long id;
     private double nivelDeLlenado;
-    private String fecha;
+    private LocalDate fecha;
 
     public NivelLlenadoDTO() {
     }
 
-    public NivelLlenadoDTO(Long id, double nivelDeLlenado, String fecha) {
+    public NivelLlenadoDTO(Long id, double nivelDeLlenado, LocalDate fecha) {
         this.id = id;
         this.nivelDeLlenado = nivelDeLlenado;
         this.fecha = fecha;
@@ -32,11 +33,11 @@ public class NivelLlenadoDTO {
         this.nivelDeLlenado = nivelDeLlenado;
     }
 
-    public String getFecha() {
+    public LocalDate getFecha() {
         return fecha;
     }
 
-    public void setFecha(String fecha) {
+    public void setFecha(LocalDate fecha) {
         this.fecha = fecha;
     }
 }
