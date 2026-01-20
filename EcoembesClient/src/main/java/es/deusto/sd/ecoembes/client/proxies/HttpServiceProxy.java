@@ -12,8 +12,6 @@ import es.deusto.sd.ecoembes.client.dto.*;
 
 @Service
 public class HttpServiceProxy implements IEcoembesServiceProxy {
-
-    // Asegúrate de que este puerto coincide con el de tu servidor (EcoembesV2_SD-1)
     private static final String SERVER_URL = "http://localhost:9000";
     
     private final RestTemplate restTemplate;
