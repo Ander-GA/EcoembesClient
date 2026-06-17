@@ -22,7 +22,7 @@ El cliente no procesa la lógica de negocio pesada, sino que está diseñado par
 1. Asegúrate de tener el [Servidor Backend](https://github.com/Ander-GA/EcoembesV2) clonado y en ejecución en tu máquina local.
 2. **Clonar este cliente:**
 ```bash
-   git clone [https://github.com/Ander-GA/EcoembesClient.git](https://github.com/Ander-GA/EcoembesClient.git)
+   git clone git clone https://github.com/Ander-GA/EcoembesClient.git
 ```
 3. **Compilar y Ejecutar:**
 Utilizando el wrapper de Gradle incluido en el proyecto:
